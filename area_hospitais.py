@@ -7,7 +7,8 @@ from area import area
 
 
 def num_para_string_com_virgula(num):
-    return str(num).replace(".", ",")
+    if num is not None:
+        return str(num).replace(".", ",")
 
 
 def cria_dicionario(poligono):
@@ -51,6 +52,8 @@ def obtem_area_telhado(lat, lon, mapa):
     coordenadas = [lat, lon]
     area_total = 0
 
+    estilo = {'fillColor':'#FF0000', 'color':'#FF0000'}
+
     predios = ox.geometries_from_point(coordenadas, tags, dist=300)
     predios = predios[predios.geom_type == 'Polygon'][:2000]
     propriedade = contorno_propriedade(lat, lon)
@@ -58,14 +61,15 @@ def obtem_area_telhado(lat, lon, mapa):
     for i, pol in enumerate(predios['geometry']):
         if propriedade != None and propriedade.contains(pol):
             if mapa: 
-                folium.GeoJson(predios[i:i+1]).add_to(mapa)
+                folium.GeoJson(predios[i:i+1], style_function=lambda x:estilo).add_to(mapa)
             area_total += area(cria_dicionario(pol))
         elif pol.contains(Point(lon, lat)):
             if mapa:
-                folium.GeoJson(predios[i:i+1]).add_to(mapa)
+                folium.GeoJson(predios[i:i+1], style_function=lambda x:estilo).add_to(mapa)
             return area(cria_dicionario(pol))
 
-    return area_total
+    if area_total != 0:
+        return area_total
 
 
 def cria_tabela_areas(tabela):
@@ -93,6 +97,9 @@ def cria_tabela_areas(tabela):
         links_osm = f"https://www.openstreetmap.org/#map=19/{lat}/{lon}"
         links_maps = f"https://www.google.com.br/maps/@/{lat},{lon},18z"
 
+        if area_propriedade is None and area_telhado is None:
+            folium.CircleMarker(location=(lat, lon), radius=3, color='green').add_to(mapa)
+
         print(linha)
         tabela_completa.write(f'{nome_hospital};{lat_virgula};{lon_virgula};{area_propriedade};{area_telhado};{links_osm};{links_maps}\n')
 
@@ -100,6 +107,6 @@ def cria_tabela_areas(tabela):
     tabela_completa.close()
 
 
-cria_tabela_areas('hospitais_faltantes.csv')
+cria_tabela_areas('tabela_completa.csv')
 
 

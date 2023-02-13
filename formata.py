@@ -1,5 +1,5 @@
-tabela = open('hospitais.txt', 'r')
-tabela_final = open('hospitais_com_contorno.csv', 'w')
+tabela = open('tabela_completa.txt', 'r')
+tabela_final = open('tabela_completa.csv', 'w')
 
 tabela_final.write('NOME,LATITUDE,LONGITUDE\n')
 for linha in tabela.readlines():
